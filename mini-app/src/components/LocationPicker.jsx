@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { createMap } from '../map/baseMap.js';
 import Icon from './Icon.jsx';
 import { tg, haptic, getLocation, openLocationSettings } from '../telegram.js';
 import { DEFAULT_CENTER, reverseGeocode, searchPlaces, placeLabel, formatCoords } from '../geo.js';
@@ -47,7 +46,7 @@ export default function LocationPicker({ initial, onPick, onClose }) {
     try {
       const position = await getLocation();
       pickedLabelRef.current = '';
-      mapRef.current?.flyTo([position.lat, position.lng], 17, { duration: 0.8 });
+      mapRef.current?.flyTo({ center: [position.lng, position.lat], zoom: 17, duration: 800 });
       haptic('success');
     } catch (locationError) {
       if (!silent) {
@@ -67,23 +66,13 @@ export default function LocationPicker({ initial, onPick, onClose }) {
     setAddress(label);
     setError('');
     closeSearch();
-    mapRef.current?.flyTo([place.lat, place.lng], place.kind === 'area' ? 16 : 17, { duration: 0.8 });
+    mapRef.current?.flyTo({ center: [place.lng, place.lat], zoom: place.kind === 'area' ? 16 : 17, duration: 800 });
   };
 
   // Xarita
   useEffect(() => {
     const start = initial || DEFAULT_CENTER;
-    const map = L.map(mapEl.current, {
-      zoomControl: false,
-      attributionControl: true,
-      center: [start.lat, start.lng],
-      zoom: initial ? 17 : 13,
-    });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap',
-    }).addTo(map);
-    map.attributionControl.setPrefix(false);
+    const map = createMap(mapEl.current, { center: start, zoom: initial ? 17 : 13 });
 
     map.on('movestart', () => setMoving(true));
     map.on('dragstart', () => {
@@ -96,7 +85,7 @@ export default function LocationPicker({ initial, onPick, onClose }) {
     });
 
     mapRef.current = map;
-    const sizeTimer = setTimeout(() => map.invalidateSize(), 250);
+    const sizeTimer = setTimeout(() => map.resize(), 250);
 
     // Birinchi marta ochilganda — joylashuvni o'zi aniqlashga urinadi
     if (!initial) locate({ silent: true });

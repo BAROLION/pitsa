@@ -1529,10 +1529,20 @@ img {
   z-index: 0;
 }
 
-.picker .leaflet-control-attribution {
+/* Xarita mualliflik yozuvi (OpenFreeMap / OpenStreetMap) — pastki panel ostida qolmasin */
+.picker .maplibregl-ctrl-bottom-right {
+  bottom: 30px;
+  right: auto;
+  left: 0;
+}
+
+.maplibregl-ctrl-attrib {
   font-size: 10px;
-  background: rgba(255, 255, 255, 0.75);
-  margin-bottom: 30px !important;
+}
+
+/* Kuzatish: pastki panel xaritaga 22px kirib turadi */
+.track-page .maplibregl-ctrl-bottom-right {
+  bottom: 24px;
 }
 
 /* Pin — xarita markazida, uchi aynan markaz nuqtasida */
@@ -2408,14 +2418,6 @@ img {
   }
 }
 
-.leaflet-marker-icon {
-  transition: transform 1s linear;
-}
-
-.leaflet-zoom-anim .leaflet-marker-icon {
-  transition: none;
-}
-
 .track-sheet {
   position: relative;
   z-index: 1;
@@ -2621,9 +2623,6 @@ img {
   .nav__live,
   .track-fact--live .live-dot {
     animation: none;
-  }
-  .leaflet-marker-icon {
-    transition: none;
   }
 }
 
