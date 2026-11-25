@@ -79,6 +79,44 @@ sozlash shart emas.
 
 ---
 
+## 🚀 Render'ga joylash (doimiy manzil, kompyutersiz)
+
+Render'da hammasi bitta serverda ishlaydi: Mini App `https://SIZNING-NOM.onrender.com`,
+Admin Panel `https://SIZNING-NOM.onrender.com/admin`, bot esa webhook orqali. Tunnel kerak emas.
+
+**New → Web Service → GitHub repo** va quyidagilarni to'ldiring:
+
+| Maydon | Qiymat |
+|---|---|
+| Language | **Node** |
+| Branch | `main` |
+| Region | **Virginia (US East)** — Neon bazasiga eng yaqin |
+| Root Directory | *(bo'sh)* |
+| Build Command | `npm install --include=dev && npm run render-build` |
+| Start Command | `npm run render-start` |
+| Instance Type | Free |
+| Health Check Path *(Advanced)* | `/api/health` |
+
+**Environment Variables** (`Add from .env` bilan `.env` ni qo'ying, keyin `ADMIN_PASSWORD` ni almashtiring):
+
+| Kalit | Qiymat |
+|---|---|
+| `DATABASE_URL`, `DIRECT_URL` | Neon manzillari (`.env` dagidek) |
+| `BOT_TOKEN`, `BOT_USERNAME`, `ADMIN_TELEGRAM_ID` | `.env` dagidek |
+| `ADMIN_PASSWORD` | **Yangi kuchli parol** (kamida 10 belgi). Kuchsiz bo'lsa, Admin Panel internetda yopiq turadi |
+
+`MINI_APP_URL`, `API_PORT`, `ALLOW_DEV_AUTH` Render'da kerak emas (e'tiborga olinmaydi) — manzilni server o'zi biladi.
+
+> ⚠️ Bot bir vaqtda faqat bitta joyda ishlaydi. Render ishga tushgach, kompyuterdagi `npm start` botga
+> tegmaydi (faqat Mini App/Admin lokal ishlaydi). Botni yana kompyuterda sinash kerak bo'lsa —
+> `.env` ga `FORCE_LOCAL_BOT=true` yozing (Render'dagi bot o'sha vaqtda to'xtaydi).
+>
+> 💤 Bepul server 15 daqiqa ishlatilmasa uxlaydi — keyingi birinchi ochilish ~1 daqiqa oladi.
+> Doim uyg'oq tursin desangiz, UptimeRobot'da `https://SIZNING-NOM.onrender.com/api/health` ni
+> har 10 daqiqada tekshiradigan bepul monitor qo'shing.
+
+---
+
 ## Ixtiyoriy: ngrok bilan doimiy manzil
 
 Cloudflare tunneli akkauntsiz ishlaydi, lekin manzili har safar o'zgaradi. Doimiy manzil

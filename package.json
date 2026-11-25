@@ -1,0 +1,44 @@
+{
+  "name": "pizza-delivery",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram Mini App + Admin Panel + Bot — pizza yetkazib berish",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "setup": "npm install && npm install --prefix mini-app && npm install --prefix admin-panel",
+    "render-build": "prisma generate && prisma migrate deploy && npm run build:web",
+    "build:web": "npm ci --prefix mini-app --include=dev && npm ci --prefix admin-panel --include=dev && npm run build --prefix mini-app && npm run build --prefix admin-panel",
+    "render-start": "node src/index.js",
+    "start": "node scripts/dev.mjs --tunnel",
+    "dev": "node scripts/dev.mjs",
+    "server": "node --watch-path=src src/index.js",
+    "mini": "npm --prefix mini-app run dev",
+    "admin": "npm --prefix admin-panel run dev",
+    "db:migrate": "prisma migrate dev --name init",
+    "db:seed": "prisma db seed",
+    "db:add-menu": "node scripts/add-menu.mjs",
+    "db:studio": "prisma studio"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "prisma": "^6.10.0"
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "prisma@6.19.3": true
+  }
+}
