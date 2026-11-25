@@ -2390,6 +2390,13 @@ img {
   margin-bottom: 6px;
 }
 
+.center__actions {
+  display: grid;
+  gap: 10px;
+  width: min(320px, 100%);
+  margin: 0 auto;
+}
+
 .center__text {
   max-width: 290px;
   margin: 0 auto 22px;

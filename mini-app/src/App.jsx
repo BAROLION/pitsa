@@ -160,7 +160,13 @@ export default function App() {
       )}
 
       {tab === 'cart' && (
-        <Cart user={user} products={products} onGoCatalog={() => openCatalog()} onOrdered={loadOrders} />
+        <Cart
+          user={user}
+          products={products}
+          onGoCatalog={() => openCatalog()}
+          onGoProfile={() => changeTab('profile')}
+          onOrdered={loadOrders}
+        />
       )}
 
       {tab === 'profile' && (

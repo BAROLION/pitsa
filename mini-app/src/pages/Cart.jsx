@@ -4,12 +4,12 @@ import Empty from '../components/Empty.jsx';
 import Icon from '../components/Icon.jsx';
 import LocationPicker from '../components/LocationPicker.jsx';
 import { money } from '../format.js';
-import { haptic, closeApp } from '../telegram.js';
+import { haptic } from '../telegram.js';
 import { loadSavedLocation, saveLocation, mapLink, formatCoords } from '../geo.js';
 import { useCart } from '../CartContext.jsx';
 import api from '../api.js';
 
-export default function Cart({ user, products, onGoCatalog, onOrdered }) {
+export default function Cart({ user, products, onGoCatalog, onGoProfile, onOrdered }) {
   const { items, count, total, setQuantity, add, remove, clear } = useCart();
 
   const [name, setName] = useState(user?.name || '');
@@ -19,7 +19,7 @@ export default function Cart({ user, products, onGoCatalog, onOrdered }) {
   const [comment, setComment] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(null); // qabul qilingan buyurtma
 
   useEffect(() => {
     if (user?.name) setName((value) => value || user.name);
@@ -60,7 +60,7 @@ export default function Cart({ user, products, onGoCatalog, onOrdered }) {
 
     setSending(true);
     try {
-      await api.createOrder({
+      const order = await api.createOrder({
         items: items.map((item) => ({ productId: item.id, quantity: item.quantity })),
         name: name.trim(),
         phone: phone.trim(),
@@ -70,9 +70,8 @@ export default function Cart({ user, products, onGoCatalog, onOrdered }) {
 
       haptic('success');
       clear();
-      setDone(true);
+      setDone(order);
       onOrdered?.();
-      setTimeout(closeApp, 2000);
     } catch (requestError) {
       haptic('error');
       setError(requestError.message);
@@ -88,12 +87,20 @@ export default function Cart({ user, products, onGoCatalog, onOrdered }) {
           <div className="center__icon center__icon--ok">
             <Icon name="check" size={56} stroke={3} />
           </div>
-          <h2 className="center__title">Buyurtma qabul qilindi!</h2>
+          <h2 className="center__title">Buyurtma #{done.id} qabul qilindi!</h2>
           <p className="muted center__text">
             Kuryerimiz tez orada bog‘lanadi 🍕
             <br />
-            Fikringiz o‘zgarsa — 5 daqiqa ichida bekor qilishingiz mumkin.
+            Fikringiz o‘zgarsa — 5 daqiqa ichida «Profil» bo‘limidan bekor qilishingiz mumkin.
           </p>
+          <div className="center__actions">
+            <button className="btn btn--primary btn--lg" onClick={onGoProfile}>
+              Buyurtmani kuzatish
+            </button>
+            <button className="btn btn--ghost btn--lg" onClick={onGoCatalog}>
+              Menyuga qaytish
+            </button>
+          </div>
         </div>
       </div>
     );
