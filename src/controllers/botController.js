@@ -25,9 +25,29 @@ async function sendOpenButton(ctx, text) {
   return ctx.reply(text, { parse_mode: 'HTML', reply_markup: openAppMarkup() });
 }
 
+/** Bir martalik joylashuv tugmasi (jonli joylashuvni Telegram faqat 📎 orqali yuboradi). */
+const courierKeyboard = () => ({
+  keyboard: [[{ text: '📍 Hozirgi joylashuvni yuborish', request_location: true }]],
+  resize_keyboard: true,
+});
+
+const courierHelp =
+  'Mijoz sizni xaritada ko‘rib turishi uchun <b>jonli joylashuv</b> yuboring:\n\n' +
+  '📎 (qisqich) → <b>Joylashuv</b> → <b>«Jonli joylashuvni ulashish»</b> → <b>1 soat</b>\n\n' +
+  'Yetkazib bo‘lgach, ulashishni to‘xtatishingiz mumkin.';
+
+/** Kuryer joylashuvi (yangi xabar yoki jonli joylashuv yangilanishi). */
+async function saveCourierLocation(ctx, location) {
+  if (!location) return 0;
+  return OrderModel.updateCourierLocation(ctx.from.id, location.latitude, location.longitude);
+}
+
 export const botController = {
-  /** /start */
+  /** /start (kuryer havolasi: /start c_<kalit>) */
   async start(ctx) {
+    const payload = String(ctx.payload ?? ctx.startPayload ?? '');
+    if (payload.startsWith('c_')) return botController.courierStart(ctx, payload.slice(2));
+
     const user = await UserModel.upsertFromTelegram(ctx.from);
 
     await ctx.reply(config.messages.welcome(escapeHtml(user.name)), {
@@ -72,6 +92,39 @@ export const botController = {
       .join('\n\n');
 
     await ctx.reply(`📜 <b>Mening buyurtmalarim</b>\n\n${text}`, { parse_mode: 'HTML' });
+  },
+
+  /** Kuryer admin bergan havolani ochdi — buyurtmaga bog'laymiz */
+  async courierStart(ctx, token) {
+    const order = /^[\w-]{10,64}$/.test(token) ? await OrderModel.bindCourier(token, ctx.from.id) : null;
+    if (!order) {
+      return ctx.reply('⚠️ Havola eskirgan yoki buyurtma allaqachon yopilgan. Admindan yangi havola so‘rang.');
+    }
+    return ctx.reply(`🛵 Siz <b>#${order.id}</b> buyurtma kuryerisiz.\n\n${courierHelp}`, {
+      parse_mode: 'HTML',
+      reply_markup: courierKeyboard(),
+    });
+  },
+
+  /** Kuryer joylashuv yubordi (jonli yoki bir martalik) */
+  async courierLocation(ctx) {
+    const location = ctx.message?.location;
+    const updated = await saveCourierLocation(ctx, location);
+    if (updated === 0) {
+      // Oddiy mijoz ham joylashuv yuborishi mumkin — unga tushunarli javob
+      return ctx.reply('Sizga biriktirilgan faol buyurtma yo‘q. Kuryer bo‘lsangiz, admin bergan havolani oching.');
+    }
+    if (location.live_period) {
+      return ctx.reply('✅ Jonli joylashuv ulandi! Mijoz sizni xaritada ko‘rib turibdi. Oq yo‘l! 🛵');
+    }
+    return ctx.reply(`📍 Joylashuv yuborildi.\n\nDoim yangilanib turishi uchun jonli joylashuvni ulashing:\n${courierHelp}`, {
+      parse_mode: 'HTML',
+    });
+  },
+
+  /** Jonli joylashuv harakatlanganda Telegram xabarni tahrirlaydi — shu yerda yangilaymiz */
+  async courierLocationUpdate(ctx) {
+    await saveCourierLocation(ctx, ctx.editedMessage?.location);
   },
 
   /** "❌ Bekor qilish" — avval tasdiq so'raymiz (tasodifan bosilmasin) */

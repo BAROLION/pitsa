@@ -9,6 +9,7 @@ import Home from './pages/Home.jsx';
 import Catalog from './pages/Catalog.jsx';
 import Cart from './pages/Cart.jsx';
 import Profile from './pages/Profile.jsx';
+import Tracking from './pages/Tracking.jsx';
 
 import api from './api.js';
 import { storage, sortByCategory, categoryList } from './format.js';
@@ -68,8 +69,8 @@ export default function App() {
     load();
   }, [load]);
 
-  // Faol buyurtma bo'lsa (tayyorlanmoqda / yo'lda) — holatni har 20 soniyada yangilab turamiz,
-  // shunda kuryer olgani va qolgan daqiqalar o'zi ko'rinadi.
+  // Faol buyurtma bo'lsa (tayyorlanmoqda / yo'lda) — holatni yangilab turamiz: "Kuzatish" sahifasida
+  // har 8 soniyada (kuryer xaritada yursin), boshqa sahifalarda har 20 soniyada.
   const hasActiveOrder = orders.some((order) => order.status === 'KUTILMOQDA' || order.status === 'YOLDA');
   const [, setTick] = useState(0);
   useEffect(() => {
@@ -77,9 +78,9 @@ export default function App() {
     const timer = setInterval(() => {
       if (document.visibilityState === 'visible') loadOrders();
       setTick((value) => value + 1);
-    }, 20000);
+    }, tab === 'track' ? 8000 : 20000);
     return () => clearInterval(timer);
-  }, [hasActiveOrder, loadOrders]);
+  }, [hasActiveOrder, loadOrders, tab]);
 
   const liveOrder = orders.find((order) => order.status === 'YOLDA');
 
@@ -92,7 +93,7 @@ export default function App() {
   const changeTab = useCallback(
     (next) => {
       setTab(next);
-      if (next === 'profile') loadOrders();
+      if (next === 'profile' || next === 'track') loadOrders();
       window.scrollTo(0, 0);
     },
     [loadOrders],
@@ -143,7 +144,7 @@ export default function App() {
           user={user}
           products={products}
           liveOrder={liveOrder}
-          onOpenProfile={() => changeTab('profile')}
+          onOpenProfile={() => changeTab('track')}
           onOpenProduct={setSheetProduct}
           onOpenCatalog={openCatalog}
         />
@@ -164,7 +165,7 @@ export default function App() {
           user={user}
           products={products}
           onGoCatalog={() => openCatalog()}
-          onGoProfile={() => changeTab('profile')}
+          onGoProfile={() => changeTab('track')}
           onOrdered={loadOrders}
         />
       )}
@@ -181,7 +182,9 @@ export default function App() {
         />
       )}
 
-      <BottomNav tab={tab} onChange={changeTab} />
+      {tab === 'track' && <Tracking orders={orders} onGoCatalog={() => openCatalog()} />}
+
+      <BottomNav tab={tab} onChange={changeTab} live={Boolean(liveOrder)} />
 
       {sheetProduct && (
         <ProductSheet

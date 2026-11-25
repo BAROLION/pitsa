@@ -24,6 +24,22 @@ export function savedAddressLabel() {
   return loadSavedLocation()?.address || storage.get(LEGACY_ADDRESS_KEY, '') || '';
 }
 
+/** Buyurtma manzili matnidagi xarita havolasidan koordinata (…?q=41.31,69.24). */
+export function destinationOf(orderLocation) {
+  const match = String(orderLocation || '').match(/[?&]q=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+  return match ? { lat: Number(match[1]), lng: Number(match[2]) } : null;
+}
+
+/** Ikki nuqta orasidagi masofa (km, to'g'ri chiziq bo'yicha). */
+export function distanceKm(a, b) {
+  if (!a || !b) return null;
+  const rad = (deg) => (deg * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(h));
+}
+
 export const mapLink = ({ lat, lng }) => `https://maps.google.com/?q=${round(lat)},${round(lng)}`;
 
 export const formatCoords = ({ lat, lng }) => `${round(lat).toFixed(5)}, ${round(lng).toFixed(5)}`;

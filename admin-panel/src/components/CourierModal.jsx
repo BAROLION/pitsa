@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Modal from './Modal.jsx';
+import CourierLink from './CourierLink.jsx';
 import api from '../api.js';
 
 const COURIERS_KEY = 'pizza_couriers';
@@ -31,6 +32,7 @@ export default function CourierModal({ order, onClose, onDone }) {
   const [eta, setEta] = useState(30);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [assigned, setAssigned] = useState(null); // kuryerga berilgan buyurtma (havola bilan)
 
   const pickCourier = (courier) => {
     setName(courier.name);
@@ -59,14 +61,33 @@ export default function CourierModal({ order, onClose, onDone }) {
 
     setSaving(true);
     try {
-      await api.assignCourier(order.id, { courierName: name.trim(), courierPhone: phone.trim(), etaMinutes: minutes });
+      const result = await api.assignCourier(order.id, { courierName: name.trim(), courierPhone: phone.trim(), etaMinutes: minutes });
       rememberCourier({ name: name.trim(), phone: phone.trim() });
-      onDone();
+      // Havola bo'lsa — kuryerga yuborish uchun ko'rsatamiz, bo'lmasa darhol yopamiz
+      if (result?.courierLink) setAssigned(result);
+      else onDone();
     } catch (requestError) {
       setError(requestError.message);
       setSaving(false);
     }
   };
+
+  if (assigned) {
+    return (
+      <Modal
+        title={`✅ Buyurtma #${order.id} — ${assigned.courierName}`}
+        onClose={onDone}
+        footer={
+          <button className="btn btn--ghost btn--full" onClick={onDone}>
+            Tayyor
+          </button>
+        }
+      >
+        <div className="courier-done">Mijozga yetib borish vaqti yuborildi.</div>
+        <CourierLink order={assigned} />
+      </Modal>
+    );
+  }
 
   return (
     <Modal

@@ -5,7 +5,7 @@ import config from '../config/default.js';
 import { sendMessageSafe, escapeHtml, formatSum } from '../core/bot.js';
 import { httpError, parseId } from '../middlewares/auth.middleware.js';
 import { cancelOrderByCustomer } from '../services/orderCancel.js';
-import { CANCEL_WINDOW_MS } from '../models/Order.js';
+import { CANCEL_WINDOW_MS, publicOrder } from '../models/Order.js';
 
 const publicUser = (user) => ({
   id: user.id,
@@ -122,14 +122,14 @@ export const cartController = {
       },
     );
 
-    res.status(201).json({ ok: true, data: order });
+    res.status(201).json({ ok: true, data: publicOrder(order) });
   },
 
   /** POST /api/client/orders/:id/cancel — mijoz 5 daqiqa ichida bekor qiladi */
   async cancelOrder(req, res) {
     const result = await cancelOrderByCustomer(parseId(req.params.id), req.user);
     if (!result.ok) throw httpError(result.error === 'not_found' ? 404 : 409, result.message);
-    res.json({ ok: true, data: result.order });
+    res.json({ ok: true, data: publicOrder(result.order) });
   },
 };
 

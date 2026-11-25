@@ -1,6 +1,14 @@
+import crypto from 'node:crypto';
 import prisma from '../database/connection.js';
 
 export const ORDER_STATUSES = ['KUTILMOQDA', 'YOLDA', 'YETKAZILDI', 'BEKOR_QILINDI'];
+
+/** Mijozga qaytariladigan buyurtma: kuryer havolasi kaliti va kuryer chat ID'si olib tashlanadi. */
+export function publicOrder(order) {
+  if (!order) return order;
+  const { courierToken, courierChatId, ...rest } = order; // eslint-disable-line no-unused-vars
+  return rest;
+}
 
 /** Mijoz buyurtmani shu vaqt ichida o'zi bekor qila oladi. */
 export const CANCEL_WINDOW_MS = 5 * 60_000;
@@ -10,8 +18,29 @@ const OrderModel = {
     return prisma.order.create({ data: { userId, items, total, location, phone, comment } });
   },
 
+  /** Mijozning buyurtmalari. Kuryer havolasining kaliti va kuryerning Telegram ID'si mijozga berilmaydi. */
   listByUser(userId) {
-    return prisma.order.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } });
+    return prisma.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      omit: { courierToken: true, courierChatId: true },
+    });
+  },
+
+  /** Kuryer bot havolasini ochdi: uning chatini buyurtmaga bog'laymiz (faqat "Yo'lda" bo'lsa). */
+  async bindCourier(token, chatId) {
+    const order = await prisma.order.findUnique({ where: { courierToken: token } });
+    if (!order || order.status !== 'YOLDA') return null;
+    return prisma.order.update({ where: { id: order.id }, data: { courierChatId: String(chatId) } });
+  },
+
+  /** Kuryerning jonli joylashuvi: unga biriktirilgan barcha "Yo'lda" buyurtmalarga yoziladi. */
+  async updateCourierLocation(chatId, lat, lng) {
+    const { count } = await prisma.order.updateMany({
+      where: { courierChatId: String(chatId), status: 'YOLDA' },
+      data: { courierLat: lat, courierLng: lng, courierLocAt: new Date() },
+    });
+    return count;
   },
 
   listAll(status) {
@@ -25,7 +54,18 @@ const OrderModel = {
   updateStatus(id, status) {
     const data = { status };
     if (status === 'YETKAZILDI') data.deliveredAt = new Date();
-    if (status === 'KUTILMOQDA') Object.assign(data, { deliveredAt: null, pickedUpAt: null, etaAt: null });
+    if (status === 'KUTILMOQDA') {
+      Object.assign(data, {
+        deliveredAt: null,
+        pickedUpAt: null,
+        etaAt: null,
+        courierToken: null,
+        courierChatId: null,
+        courierLat: null,
+        courierLng: null,
+        courierLocAt: null,
+      });
+    }
     return prisma.order.update({ where: { id }, data, include: { user: true } });
   },
 
@@ -41,6 +81,12 @@ const OrderModel = {
         pickedUpAt: now,
         etaAt: new Date(now.getTime() + etaMinutes * 60_000),
         deliveredAt: null,
+        // Har safar yangi havola: eski kuryer bu buyurtmani kuzata olmaydi
+        courierToken: crypto.randomBytes(16).toString('base64url'),
+        courierChatId: null,
+        courierLat: null,
+        courierLng: null,
+        courierLocAt: null,
       },
       include: { user: true },
     });

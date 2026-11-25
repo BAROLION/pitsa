@@ -3,6 +3,7 @@ import api from '../api.js';
 import { money, formatDate, formatClock, minutesLeft, STATUS } from '../format.js';
 import Empty from '../components/Empty.jsx';
 import CourierModal from '../components/CourierModal.jsx';
+import CourierLink from '../components/CourierLink.jsx';
 
 const FILTERS = [
   { key: '', label: 'Barchasi' },
@@ -69,6 +70,33 @@ function Location({ text }) {
 }
 
 /** Kuryer va yetib borish vaqti (holat "Yo'lda" bo'lganda). */
+/** Kuryerning jonli joylashuvi: ulashyaptimi, qachon yangilangan, xaritada qayerda. */
+function CourierLive({ order }) {
+  if (order.courierLocAt) {
+    const minutes = Math.round((Date.now() - new Date(order.courierLocAt).getTime()) / 60_000);
+    const fresh = minutes < 3;
+    return (
+      <div className={`courier__live ${fresh ? 'courier__live--on' : ''}`}>
+        📡 {fresh ? 'Jonli' : `${minutes} daq oldin`} ·{' '}
+        <a
+          href={`https://maps.google.com/?q=${order.courierLat},${order.courierLng}`}
+          target="_blank"
+          rel="noreferrer"
+          className="map-link"
+        >
+          kuryer qayerda
+        </a>
+      </div>
+    );
+  }
+  return (
+    <>
+      <div className="courier__live">📡 Kuryer joylashuvini hali ulashmadi</div>
+      <CourierLink order={order} compact />
+    </>
+  );
+}
+
 function CourierInfo({ order }) {
   if (!order.courierName) return null;
   const left = order.etaAt ? minutesLeft(order.etaAt) : null;
@@ -90,6 +118,7 @@ function CourierInfo({ order }) {
           {left > 0 ? `${left} daq qoldi` : left === 0 ? 'hozir yetib boradi' : `${-left} daq kechikmoqda`}
         </div>
       )}
+      {order.status === 'YOLDA' && <CourierLive order={order} />}
       {delivered && (
         <div className="courier__eta">
           ✅ {Math.max(1, Math.round((new Date(order.deliveredAt) - new Date(order.pickedUpAt)) / 60_000))} daqiqada

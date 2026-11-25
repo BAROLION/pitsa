@@ -104,7 +104,7 @@ async function applyWebhook() {
   await bot.telegram.setWebhook(webhookUrl(), {
     secret_token: config.bot.webhookSecret,
     drop_pending_updates: false,
-    allowed_updates: ['message', 'callback_query'],
+    allowed_updates: ['message', 'edited_message', 'callback_query'],
   });
 }
 

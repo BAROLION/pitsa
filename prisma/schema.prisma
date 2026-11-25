@@ -62,10 +62,18 @@ model Order {
   etaAt        DateTime? // taxminiy yetib borish vaqti
   deliveredAt  DateTime? // haqiqatda yetkazilgan vaqt
 
+  // Kuryerni jonli kuzatish (Telegram "Live Location")
+  courierToken  String?   @unique // kuryer havolasi uchun maxfiy kalit (mijozga ko'rsatilmaydi)
+  courierChatId String? // havolani ochgan kuryerning Telegram ID'si
+  courierLat    Float?
+  courierLng    Float?
+  courierLocAt  DateTime? // oxirgi joylashuv vaqti
+
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
   @@index([userId])
   @@index([createdAt])
+  @@index([courierChatId])
   @@map("orders")
 }

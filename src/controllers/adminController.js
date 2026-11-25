@@ -3,7 +3,7 @@ import ProductModel from '../models/Product.js';
 import OrderModel, { ORDER_STATUSES } from '../models/Order.js';
 import UserModel from '../models/User.js';
 import config from '../config/default.js';
-import { sendMessageSafe, escapeHtml } from '../core/bot.js';
+import bot, { sendMessageSafe, escapeHtml } from '../core/bot.js';
 import { createAdminToken, httpError, parseId } from '../middlewares/auth.middleware.js';
 
 const STATUS_TEXT = {
@@ -39,6 +39,15 @@ function validateProduct(body) {
   return body;
 }
 
+/** Kuryer uchun bot havolasi: ochganda bot uni shu buyurtmaga bog'laydi. */
+function courierLink(order) {
+  const username = config.bot.username || bot.botInfo?.username;
+  if (!order.courierToken || !username || order.status !== 'YOLDA') return null;
+  return `https://t.me/${username}?start=c_${order.courierToken}`;
+}
+
+const withCourierLink = (order) => ({ ...order, courierLink: courierLink(order) });
+
 export const adminController = {
   /** POST /api/admin/login */
   async login(req, res) {
@@ -67,7 +76,8 @@ export const adminController = {
 
   /** GET /api/admin/orders?status=KUTILMOQDA */
   async getOrders(req, res) {
-    res.json({ ok: true, data: await OrderModel.listAll(req.query.status) });
+    const orders = await OrderModel.listAll(req.query.status);
+    res.json({ ok: true, data: orders.map(withCourierLink) });
   },
 
   /** PATCH /api/admin/orders/:id/status */
@@ -87,7 +97,16 @@ export const adminController = {
       sendMessageSafe(order.user.telegramId, `📦 <b>Buyurtma #${order.id}</b> ${STATUS_TEXT[status]}${late}`);
     }
 
-    res.json({ ok: true, data: order });
+    // Kuryerga: buyurtma yopildi — jonli joylashuvni to'xtatsa bo'ladi
+    if (order.courierChatId && (status === 'YETKAZILDI' || status === 'BEKOR_QILINDI')) {
+      sendMessageSafe(
+        order.courierChatId,
+        `${status === 'YETKAZILDI' ? '✅' : '❌'} <b>Buyurtma #${order.id}</b> ${status === 'YETKAZILDI' ? 'yetkazildi' : 'bekor qilindi'}. ` +
+          'Jonli joylashuvni ulashishni to‘xtatishingiz mumkin. Rahmat! 🛵',
+      );
+    }
+
+    res.json({ ok: true, data: withCourierLink(order) });
   },
 
   /**
@@ -111,7 +130,7 @@ export const adminController = {
 
     if (order.user?.telegramId) sendMessageSafe(order.user.telegramId, courierMessage(order, etaMinutes));
 
-    res.json({ ok: true, data: order });
+    res.json({ ok: true, data: withCourierLink(order) });
   },
 
   /** DELETE /api/admin/orders/:id */

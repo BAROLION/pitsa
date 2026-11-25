@@ -637,6 +637,74 @@ tbody tr:hover {
   color: var(--accent);
 }
 
+.courier__live {
+  margin-top: 2px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.courier__live--on {
+  color: var(--ok);
+}
+
+/* Kuryer havolasi */
+.courier-done {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--ok-soft);
+  color: var(--ok);
+  font-weight: 650;
+}
+
+.courier-link {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  margin-bottom: 14px;
+}
+
+.courier-link__title {
+  font-weight: 750;
+  font-size: 15px;
+}
+
+.courier-link__text {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.courier-link__url {
+  display: block;
+  margin: 10px 0 12px;
+  padding: 9px 11px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.courier-link__actions {
+  display: grid;
+  gap: 8px;
+}
+
+.courier-link__actions .btn,
+.courier-link--compact .btn {
+  text-decoration: none;
+}
+
+.courier-link--compact {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.courier-link--compact .btn:first-child {
+  flex: 1;
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;

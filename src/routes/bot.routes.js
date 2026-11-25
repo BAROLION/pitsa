@@ -17,6 +17,10 @@ export function registerBotHandlers() {
   bot.action(/^cancel_yes:(\d+)$/, botController.cancelConfirm);
   bot.action(/^cancel_no:(\d+)$/, botController.cancelKeep);
 
+  // Kuryerning joylashuvi: birinchi xabar va jonli joylashuv yangilanishlari (edited_message)
+  bot.on('location', botController.courierLocation);
+  bot.on('edited_message', botController.courierLocationUpdate);
+
   bot.on('text', botController.fallback);
 
   bot.catch((error, ctx) => {
