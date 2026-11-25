@@ -167,8 +167,8 @@ export default function Products({ onRefreshStats }) {
               <tbody>
                 {products.map((product) => (
                   <tr key={product.id} className={product.isActive ? '' : 'row--muted'}>
-                    <td className="cell-muted">#{product.id}</td>
-                    <td>
+                    <td className="cell-muted cell-id">#{product.id}</td>
+                    <td className="cell-block cell-product">
                       <div className="prod-cell">
                         <img
                           className="thumb"
@@ -184,12 +184,12 @@ export default function Products({ onRefreshStats }) {
                         </div>
                       </div>
                     </td>
-                    <td className="cell-nowrap">{product.category}</td>
-                    <td className="cell-muted cell-nowrap price-old">
-                      {product.oldPrice > product.newPrice ? money(product.oldPrice) : '—'}
+                    <td className="cell-nowrap" data-label="Kategoriya">{product.category}</td>
+                    <td className="cell-muted cell-nowrap" data-label="Eski narx">
+                      {product.oldPrice > product.newPrice ? <span className="price-old">{money(product.oldPrice)}</span> : '—'}
                     </td>
-                    <td className="cell-strong cell-nowrap price-new">{money(product.newPrice)}</td>
-                    <td>
+                    <td className="cell-strong cell-nowrap price-new" data-label="Yangi narx">{money(product.newPrice)}</td>
+                    <td data-label="Holat">
                       <button
                         className={`badge badge--btn ${product.isActive ? 'badge--ok' : 'badge--off'}`}
                         onClick={() => toggleActive(product)}
@@ -198,7 +198,7 @@ export default function Products({ onRefreshStats }) {
                         {product.isActive ? 'Faol' : 'Yashirilgan'}
                       </button>
                     </td>
-                    <td>
+                    <td className="cell-row-actions">
                       <div className="cell-actions">
                         <button className="icon-btn" title="Tahrirlash" aria-label="Tahrirlash" onClick={() => openForm(product)}>
                           ✏️

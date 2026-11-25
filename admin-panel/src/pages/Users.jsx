@@ -61,15 +61,15 @@ export default function Users() {
               <tbody>
                 {users.map((user) => (
                   <tr key={user.id}>
-                    <td className="cell-muted">#{user.id}</td>
-                    <td className="cell-strong">
+                    <td className="cell-muted cell-id">#{user.id}</td>
+                    <td className="cell-strong cell-title">
                       {user.name}
                       {user.isAdmin && <span className="badge badge--warn badge--inline">admin</span>}
                     </td>
-                    <td className="cell-nowrap">{user.phone || '—'}</td>
-                    <td className="cell-muted cell-nowrap">{user.telegramId}</td>
-                    <td className="cell-strong">{user._count?.orders ?? 0}</td>
-                    <td className="cell-muted cell-nowrap">{formatDate(user.createdAt)}</td>
+                    <td className="cell-nowrap" data-label="Telefon">{user.phone || '—'}</td>
+                    <td className="cell-muted cell-nowrap" data-label="Telegram ID">{user.telegramId}</td>
+                    <td className="cell-strong" data-label="Buyurtmalar">{user._count?.orders ?? 0}</td>
+                    <td className="cell-muted cell-nowrap" data-label="Qo‘shilgan">{formatDate(user.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

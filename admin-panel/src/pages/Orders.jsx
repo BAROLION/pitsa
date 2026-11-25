@@ -294,12 +294,12 @@ export default function Orders({ stats, onRefreshStats }) {
                   const phone = order.phone || order.user?.phone;
                   return (
                     <tr key={order.id} className={fresh.has(order.id) ? 'row--new' : ''}>
-                      <td className="cell-strong">#{order.id}</td>
-                      <td className="cell-strong">{order.user?.name || '—'}</td>
-                      <td className="cell-nowrap">
+                      <td className="cell-strong cell-id">#{order.id}</td>
+                      <td className="cell-strong cell-title">{order.user?.name || '—'}</td>
+                      <td className="cell-nowrap" data-label="Telefon">
                         {phone ? <a href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a> : '—'}
                       </td>
-                      <td>
+                      <td className="cell-block" data-label="Mahsulotlar">
                         <div className="items-list">
                           {(order.items || []).map((item) => (
                             <span key={`${order.id}-${item.productId}`}>
@@ -308,13 +308,13 @@ export default function Orders({ stats, onRefreshStats }) {
                           ))}
                         </div>
                       </td>
-                      <td className="cell-muted cell-address">
+                      <td className="cell-muted cell-address cell-block" data-label="Manzil">
                         <Location text={order.location} />
                         {order.comment && <div className="cell-comment">💬 {order.comment}</div>}
                       </td>
-                      <td className="cell-strong cell-nowrap">{money(order.total)}</td>
-                      <td className="cell-muted cell-nowrap">{formatDate(order.createdAt)}</td>
-                      <td className="cell-status">
+                      <td className="cell-strong cell-nowrap" data-label="Jami">{money(order.total)}</td>
+                      <td className="cell-muted cell-nowrap" data-label="Sana">{formatDate(order.createdAt)}</td>
+                      <td className="cell-status cell-block" data-label="Holati">
                         <select
                           className={`status-select status-select--${status.tone}`}
                           value={order.status}
@@ -344,7 +344,7 @@ export default function Orders({ stats, onRefreshStats }) {
 
                         <CourierInfo order={order} />
                       </td>
-                      <td>
+                      <td className="cell-del">
                         <button
                           className="icon-btn icon-btn--danger"
                           title="O‘chirish"
