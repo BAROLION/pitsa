@@ -1,0 +1,25 @@
+# Render'ning bepul serveri 15 daqiqa so'rov kelmasa uxlaydi va keyingi ochilish ~1 daqiqa kutadi.
+# Bu workflow har 10 daqiqada /api/health ni chaqirib, serverni uyg'oq ushlab turadi (UptimeRobot o'rniga).
+name: Render'ni uyg'oq tutish
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: /api/health ni chaqirish
+        run: |
+          for i in 1 2 3; do
+            if curl -fsS --max-time 90 https://pitsa-1uvp.onrender.com/api/health; then
+              echo; echo "Server uyg'oq ✅"; exit 0
+            fi
+            echo "Urinish $i muvaffaqiyatsiz, 20 soniyadan keyin yana..."; sleep 20
+          done
+          echo "Server javob bermadi ❌"; exit 1
