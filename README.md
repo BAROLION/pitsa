@@ -115,6 +115,13 @@ Admin Panel `https://SIZNING-NOM.onrender.com/admin`, bot esa webhook orqali. Tu
 > Doim uyg'oq tursin desangiz, UptimeRobot'da `https://SIZNING-NOM.onrender.com/api/health` ni
 > har 10 daqiqada tekshiradigan bepul monitor qo'shing.
 
+### Ixtiyoriy: Mini App sahifasi Vercel'da
+
+`vercel.json` Mini App'ni Vercel'da build qiladi, `/api/*` so'rovlarini esa Render'ga uzatadi
+(manzil `vercel.json` ichida). Vercel loyihasida **Root Directory bo'sh** va **Framework: Other** bo'lsin —
+qolgan sozlamalar fayldan olinadi. Bot Vercel manzilini ochishi uchun Render → Environment'da
+`MINI_APP_URL=https://LOYIHA.vercel.app` qo'shing. Admin Panel baribir Render'da (`/admin`).
+
 ---
 
 ## Ixtiyoriy: ngrok bilan doimiy manzil
