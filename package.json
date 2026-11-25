@@ -9,7 +9,7 @@
     "setup": "npm install && npm install --prefix mini-app && npm install --prefix admin-panel",
     "render-build": "prisma generate && prisma migrate deploy && npm run build:web",
     "build:web": "npm ci --prefix mini-app --include=dev && npm ci --prefix admin-panel --include=dev && npm run build --prefix mini-app && npm run build --prefix admin-panel",
-    "render-start": "node src/index.js",
+    "render-start": "MINI_APP_URL=${MINI_APP_URL:-https://pitsadostavka.vercel.app} node src/index.js",
     "start": "node scripts/dev.mjs --tunnel",
     "dev": "node scripts/dev.mjs",
     "server": "node --watch-path=src src/index.js",
