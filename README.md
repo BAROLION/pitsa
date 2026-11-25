@@ -133,3 +133,4 @@ telegram app/
 - Mini App API'si har bir so'rovda Telegram imzosini (`initData`) tekshiradi. Imzosiz so'rovlar faqat
   `localhost` dan (brauzerda sinash rejimida) o'tadi.
 "# Yangi loyiha" 
+"# Yangi loyiha" 
